@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+encoding//API/BeautifulSoup.py=utf-8
+encoding//API/DownLoadZeboData.py=utf-8
+encoding//API/feedparser.py=utf-8
+encoding//API/pydelicious.py=utf-8
+encoding//API/sheet.py=utf-8
+encoding//Data/DataRecommendations.py=utf-8
+encoding//Strategy/StrategyCluster.py=utf-8
+encoding//Strategy/StrategyGenerateFeeds.py=utf-8
+encoding//Strategy/StrategyRecommendations.py=utf-8
+encoding//Strategy/StrategySimilarity.py=utf-8
+encoding//Test/Main.py=UTF-8
