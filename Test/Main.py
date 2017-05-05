@@ -9,9 +9,11 @@ from Strategy import StrategyRecommendations
 from Strategy import StrategySimilarity
 from Strategy import StrategyGenerateFeeds
 from Strategy import StrategyCluster
+from Strategy import StrategyScale
 from API import sheet
 from API import pydelicious
 from API import DownLoadZeboData
+from API import DrawImage
 import os
 
 def print_tuple_table(values):
@@ -95,9 +97,15 @@ def Test():
     DownLoadZeboData.generate_data_from_zebo()
     print "Download finished!"
     '''
+    '''
     wants, people, data = sheet.read_sheet('I:/SVN/Repository/AI/Data/zebo.txt')
     cluster = StrategyCluster.cluster_statistics(data, similarity = StrategySimilarity.get_tanimoto_correlation)
     StrategyCluster.draw_dendrogram(cluster, wants, 'I:/SVN/Repository/AI/Data/blogCluster.jpg')
+    '''
+    blognames, words, data = sheet.read_sheet('I:/SVN/Repository/AI/Data/blogdata.txt')
+    coords = StrategyScale.multidimensional_scaling(data)
+    print "Get coords finished!"
+    DrawImage.draw_two_demension(coords, blognames, jpeg = 'I:/SVN/Repository/AI/Data/blogs2d.jpg')
     print "Finished!"
 
 if __name__ == '__main__':
