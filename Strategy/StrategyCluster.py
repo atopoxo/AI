@@ -57,7 +57,7 @@ def k_cluster(values, similarity = StrategySimilarity.get_pearson_correlation, k
     
     return lastBestMatches
     
-def cluster_statistics(values, similarity = StrategySimilarity.get_pearson_correlation):
+def hierarchical_cluster(values, similarity = StrategySimilarity.get_pearson_correlation):
     distances           = {}
     currentClusterId    = -1
     
