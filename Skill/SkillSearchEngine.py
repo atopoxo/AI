@@ -213,17 +213,6 @@ class Searcher:
         
         return rows, wordIdList
         
-    def get_scored_list(self, rows, wordIdList):
-        totalScores = dict([(row[0], 0) for row in rows])
-        
-        weights = [(1.0, self.frequency_score(rows))]
-        
-        for (weight, scores) in weights:
-            for url in totalScores:
-                totalScores[url] += weight * scores[url] 
-                
-        return totalScores
-    
     def get_url_name(self, id):
         try:
             result = self.connection.execute("select url from url_list where rowid=%d" % id).fetchone()[0]
@@ -232,13 +221,47 @@ class Searcher:
         
         return result
     
-    def frequency_score(self, rows):
+    def get_scored_list(self, rows, wordIdList):
+        totalScores = dict([(row[0], 0) for row in rows])
+        
+        weights = [(1.0, self.words_frequency_score(rows)),
+                   (1.5, self.words_location_score(rows)),
+                   (1.5, self.words_distance_score(rows))]
+        
+        for (weight, scores) in weights:
+            for url in totalScores:
+                totalScores[url] += weight * scores[url] 
+                
+        return totalScores
+    
+    def words_frequency_score(self, rows):
         counts = dict([(row[0], 0) for row in rows])
         
         for row in rows:
             counts[row[0]] += 1
         
         return self.normalize_scores(counts)
+    
+    def words_location_score(self, rows):
+        locations = dict([(row[0], -1) for row in rows])
+        
+        for row in rows:
+            localDistance = sum(row[1:])
+            if localDistance < locations[row[0]] or locations[row[0]] == -1:
+                locations[row[0]] = localDistance
+                
+        return self.normalize_scores(locations, smallIsBetter = 1)
+    
+    def words_distance_score(self, rows):
+        if len(rows[0]) <= 2:
+            return dict([(row[0], 1.0) for row in rows])
+        urlWordsDistance = dict([(row[0], -1) for row in rows])
+        for row in rows:
+            distance = sum([abs(row[i] - row[i - 1]) for i in range(2, len(row))])
+            if distance < urlWordsDistance[row[0]] or urlWordsDistance[row[0]] == -1:
+                urlWordsDistance[row[0]] = distance
+        
+        return self.normalize_scores(urlWordsDistance, smallIsBetter = 1)
     
     def normalize_scores(self, scores, smallIsBetter = 0):
         eps = 0.00001

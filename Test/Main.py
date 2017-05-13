@@ -115,7 +115,7 @@ def Test():
     crawler.crawl(pages)
     '''
     e = SkillSearchEngine.Searcher('searchindex.db')
-    e.output_query('python', length = 10)
+    e.output_query('python beautifulsoup', length = 10)
     print "Finished!"
 
 if __name__ == '__main__':
