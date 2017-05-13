@@ -225,8 +225,9 @@ class Searcher:
         totalScores = dict([(row[0], 0) for row in rows])
         
         weights = [(1.0, self.words_frequency_score(rows)),
-                   (1.5, self.words_location_score(rows)),
-                   (1.5, self.words_distance_score(rows))]
+                   (1.0, self.words_location_score(rows)),
+                   (1.0, self.words_distance_score(rows)),
+                   (1.0, self.link_count_score(rows))]
         
         for (weight, scores) in weights:
             for url in totalScores:
@@ -262,6 +263,12 @@ class Searcher:
                 urlWordsDistance[row[0]] = distance
         
         return self.normalize_scores(urlWordsDistance, smallIsBetter = 1)
+    
+    def link_count_score(self, rows):
+        uniqueUrlIdList = set([row[0] for row in rows])
+        linkCounts = dict([(urlId, self.connection.execute("select count(*) from link where to_id=%d" % urlId).fetchone()[0]) for urlId in uniqueUrlIdList])
+        
+        return self.normalize_scores(linkCounts)
     
     def normalize_scores(self, scores, smallIsBetter = 0):
         eps = 0.00001
