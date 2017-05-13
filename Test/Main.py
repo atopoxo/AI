@@ -10,6 +10,7 @@ from Strategy import StrategySimilarity
 from Strategy import StrategyGenerateFeeds
 from Strategy import StrategyCluster
 from Strategy import StrategyScale
+from Skill import SkillSearchEngine
 from API import sheet
 from API import pydelicious
 from API import DownLoadZeboData
@@ -99,13 +100,22 @@ def Test():
     '''
     '''
     wants, people, data = sheet.read_sheet('I:/SVN/Repository/AI/Data/zebo.txt')
-    cluster = StrategyCluster.cluster_statistics(data, similarity = StrategySimilarity.get_tanimoto_correlation)
+    cluster = StrategyCluster.hierarchical_cluster(data, similarity = StrategySimilarity.get_tanimoto_correlation)
     StrategyCluster.draw_dendrogram(cluster, wants, 'I:/SVN/Repository/AI/Data/blogCluster.jpg')
+    '''
     '''
     blognames, words, data = sheet.read_sheet('I:/SVN/Repository/AI/Data/blogdata.txt')
     coords = StrategyScale.multidimensional_scaling(data)
     print "Get coords finished!"
     DrawImage.draw_two_demension(coords, blognames, jpeg = 'I:/SVN/Repository/AI/Data/blogs2d.jpg')
+    '''
+    '''
+    crawler = SkillSearchEngine.Crawler('searchindex.db')
+    pages = ["http://stackoverflow.com/questions/36778189/beautifulsoup-returns-an-empty-string"]
+    crawler.crawl(pages)
+    '''
+    e = SkillSearchEngine.Searcher('searchindex.db')
+    e.output_query('python', length = 10)
     print "Finished!"
 
 if __name__ == '__main__':

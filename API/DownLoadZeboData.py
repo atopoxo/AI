@@ -3,7 +3,7 @@
 Created on 2017/05/02
 @author: crystal
 '''
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import urllib2
 import re
 
