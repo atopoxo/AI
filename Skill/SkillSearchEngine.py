@@ -170,7 +170,7 @@ class Searcher:
     def query(self, queryMessage, length = 10):
         rows, wordIdList = self.get_match_rows(queryMessage)
         scores = self.get_scored_list(rows, wordIdList)
-        rankedScores = sorted([(score, url) for (url, score) in scores.items()], reverse = 1)
+        rankedScores = sorted([(score, urlId) for (urlId, score) in scores.items()], reverse = 1)
         
         return rankedScores[0:length]
     
@@ -216,7 +216,7 @@ class Searcher:
     def get_scored_list(self, rows, wordIdList):
         totalScores = dict([(row[0], 0) for row in rows])
         
-        weights = []
+        weights = [(1.0, self.frequency_score(rows))]
         
         for (weight, scores) in weights:
             for url in totalScores:
@@ -231,3 +231,22 @@ class Searcher:
             print "select url from url_list where rowid=%d fetchone failed!" % id
         
         return result
+    
+    def frequency_score(self, rows):
+        counts = dict([(row[0], 0) for row in rows])
+        
+        for row in rows:
+            counts[row[0]] += 1
+        
+        return self.normalize_scores(counts)
+    
+    def normalize_scores(self, scores, smallIsBetter = 0):
+        eps = 0.00001
+        if smallIsBetter:
+            minScore = min(scores.values())
+            return dict([(urlId, float(minScore) / max(eps, score)) for (urlId, score) in scores.items()])
+        else:
+            maxScore = max(scores.values())
+            if maxScore == 0:
+                maxScore = eps
+            return dict([(urlId, float(score) / maxScore) for (urlId, score) in scores.items()])
