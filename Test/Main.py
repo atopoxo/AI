@@ -116,6 +116,10 @@ def Test():
     '''
     e = SkillSearchEngine.Searcher('searchindex.db')
     e.output_query('python beautifulsoup', length = 10)
+    '''
+    crawler = SkillSearchEngine.Crawler('searchindex.db')
+    crawler.calculate_page_rank()
+    '''
     print "Finished!"
 
 if __name__ == '__main__':

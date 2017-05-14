@@ -55,7 +55,50 @@ class Crawler:
                 except:
                     print "Could not parse page %s" % page
             pages = newPages
+        
+    def calculate_page_rank(self, iterations = 20):
+        try:
+            count = self.connection.execute("select count(*) from sqlite_master where type = 'table' and name = 'page_rank'").fetchone()[0]
+            if count <= 0:
+                self.connection.execute("create table if not exists page_rank(url_id primary key, score)")   
+                self.connection.execute("insert into page_rank select rowid, 1.0 from url_list") 
+                self.db_commit()
+        except:
+            print "Initiate page_rank failed!" 
+        
+        for i in range(iterations):
+            print "Iteration %d" % i
             
+            try:
+                toIdList = self.connection.execute("select rowid from url_list")
+            except:
+                print "Select rowid from url_list failed!"
+            for (toId, ) in toIdList:
+                urlPageRankScore = 0.15
+                
+                try:
+                    fromIdList = self.connection.execute("select distinct from_id from link where to_id=%d" % toId)
+                except:
+                    print "Select distinct from_id from link where to_id=%d failed!" % toId
+                for (fromId, ) in fromIdList:
+                    try:
+                        pageRankScore = self.connection.execute("select score from page_rank where url_id=%d" % fromId).fetchone()[0]
+                    except:
+                        print "Select score from page_rank where url_id=%d failed!" % fromId
+                        
+                    try:
+                        linkCount = self.connection.execute("select count(*) from link where from_id=%d" % fromId).fetchone()[0]
+                    except:
+                        print "Select count(*) from link where from_id=%d failed!" % fromId
+                        
+                    urlPageRankScore += 0.85 * (float(pageRankScore) / linkCount)
+                    
+                    try:
+                        self.connection.execute("update page_rank set score=%f where url_id=%d" % (urlPageRankScore, toId))
+                    except:
+                        print "Update page_rank set score=%f where url_id=%d failed!" % (urlPageRankScore, toId)
+                self.db_commit()
+        
     def check_tables(self):
         try:
             self.connection.execute('create table if not exists url_list(url)')
@@ -227,7 +270,9 @@ class Searcher:
         weights = [(1.0, self.words_frequency_score(rows)),
                    (1.0, self.words_location_score(rows)),
                    (1.0, self.words_distance_score(rows)),
-                   (1.0, self.link_count_score(rows))]
+                   (1.0, self.link_count_score(rows)),
+                   (2.0, self.page_rank_score(rows)),
+                   (2.0, self.link_text_score(rows, wordIdList))]
         
         for (weight, scores) in weights:
             for url in totalScores:
@@ -269,6 +314,37 @@ class Searcher:
         linkCounts = dict([(urlId, self.connection.execute("select count(*) from link where to_id=%d" % urlId).fetchone()[0]) for urlId in uniqueUrlIdList])
         
         return self.normalize_scores(linkCounts)
+    
+    def page_rank_score(self, rows):
+        try:
+            count = self.connection.execute("select count(*) from sqlite_master where type = 'table' and name = 'page_rank'").fetchone()[0]
+            if count <= 0:
+                crawler = Crawler('searchindex.db')
+                crawler.calculate_page_rank(iterations = 5)
+        except:
+            print "Initiate page_rank failed!"
+        
+        try:
+            pageRanks = dict([(row[0], self.connection.execute("select score from page_rank where url_id=%d" % row[0]).fetchone()[0]) for row in rows])
+            return self.normalize_scores(pageRanks)
+        except:
+            print "Select score from page_rank execute failed!"
+            
+    def link_text_score(self, rows, wordIdList):
+        linkScores = dict([(row[0], 0) for row in rows])
+        
+        for wordId in wordIdList:
+            urlPairs = self.connection.execute("select link.from_id, link.to_id from link_words, link where link_words.word_id=%d and link_words.link_id=link.rowid" % wordId)
+            for (fromId, toId) in urlPairs:
+                if toId not in linkScores:
+                    continue
+                try:
+                    pageRankScore = self.connection.execute("select score from page_rank where url_id=%d" % fromId).fetchone()[0]
+                    linkScores[toId] += pageRankScore
+                except:
+                    print "Select score from page_rank where url_id=%d failed!" % fromId
+        
+        return self.normalize_scores(linkScores)
     
     def normalize_scores(self, scores, smallIsBetter = 0):
         eps = 0.00001
