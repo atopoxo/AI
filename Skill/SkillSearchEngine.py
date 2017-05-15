@@ -9,6 +9,7 @@ import urllib2
 from urlparse import urljoin
 from sqlite3 import dbapi2 as sqlite
 from bs4 import BeautifulSoup
+from NNs import NNsSearchNet
 
 ignoreWords={'the':1,'of':1,'to':1,'and':1,'a':1,'in':1,'is':1,'it':1}
 
@@ -272,8 +273,9 @@ class Searcher:
                    (1.0, self.words_location_score(rows)),
                    (1.0, self.words_distance_score(rows)),
                    (1.0, self.link_count_score(rows)),
-                   (2.0, self.page_rank_score(rows)),
-                   (2.0, self.link_text_score(rows, wordIdList))]
+                   (1.0, self.page_rank_score(rows)),
+                   (1.0, self.link_text_score(rows, wordIdList)),
+                   (6.0, self.train_score(rows, wordIdList))]
         
         for (weight, scores) in weights:
             for url in totalScores:
@@ -346,6 +348,13 @@ class Searcher:
                     print "Select score from page_rank where url_id=%d failed!" % fromId
         
         return self.normalize_scores(linkScores)
+    
+    def train_score(self, rows, wordIdList):
+        currentNNsSearchNet = NNsSearchNet.SearchNet('NeuralNetworks.db')
+        urlIdList = [urlId for urlId in set([row[0] for row in rows])]
+        correlations = currentNNsSearchNet.get_correlation(wordIdList, urlIdList)
+        scores = dict([(urlIdList[i], correlations[i]) for i in range(len(urlIdList))])
+        return self.normalize_scores(scores)
     
     def normalize_scores(self, scores, smallIsBetter = 0):
         eps = 0.00001
