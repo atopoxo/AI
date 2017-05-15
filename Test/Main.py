@@ -16,6 +16,7 @@ from API import pydelicious
 from API import DownLoadZeboData
 from API import DrawImage
 import os
+from NNs import NNsSearchNet
 
 def print_tuple_table(values):
     column = [""]
@@ -114,12 +115,39 @@ def Test():
     pages = ["http://stackoverflow.com/questions/36778189/beautifulsoup-returns-an-empty-string"]
     crawler.crawl(pages)
     '''
+    '''
     e = SkillSearchEngine.Searcher('searchindex.db')
     e.output_query('python beautifulsoup', length = 10)
+    '''
     '''
     crawler = SkillSearchEngine.Crawler('searchindex.db')
     crawler.calculate_page_rank()
     '''
+    
+    mynet = NNsSearchNet.SearchNet('NeuralNetworks.db')
+    
+    wWorld = 1
+    wBank = 2
+    wRiver = 3
+    inputIdList = [wWorld, wBank, wRiver]
+    uWorldBank = 11
+    uRiver = 12
+    uEarth = 13
+    outputIdList = [uWorldBank, uRiver, uEarth]
+    '''
+    mynet.train_correlation([wWorld, wBank], outputIdList, uWorldBank)
+    print mynet.get_correlation([wWorld, wBank], outputIdList)
+    '''
+    
+    for i in range(30):
+        mynet.train_correlation([wWorld, wBank], outputIdList, uWorldBank)
+        mynet.train_correlation([wRiver, wBank], outputIdList, uRiver)
+        mynet.train_correlation([wWorld], outputIdList, uEarth)
+        
+    print mynet.get_correlation([wWorld, wBank], outputIdList)
+    print mynet.get_correlation([wRiver, wBank], outputIdList)
+    print mynet.get_correlation([wBank], outputIdList)
+    
     print "Finished!"
 
 if __name__ == '__main__':

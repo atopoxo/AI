@@ -14,6 +14,7 @@ ignoreWords={'the':1,'of':1,'to':1,'and':1,'a':1,'in':1,'is':1,'it':1}
 
 class Crawler:
     def __init__(self, dbName):
+        self.dbName = dbName
         self.connection = sqlite.connect(dbName)
     
     def __del__(self):
@@ -111,7 +112,7 @@ class Crawler:
             self.connection.execute('create index if not exists I_URL_TO on link(to_id)')
             self.connection.execute('create index if not exists I_URL_FROM on link(from_id)')
             self.connection.execute('create table if not exists link_words(link_id, word_id)')
-            self.connection.commit()
+            self.db_commit()
         except:
             print "Check table failed!"
         
@@ -205,6 +206,7 @@ class Crawler:
             
 class Searcher:
     def __init__(self, dbName):
+        self.dbName = dbName
         self.connection = sqlite.connect(dbName)
         
     def __del__(self):
@@ -219,7 +221,6 @@ class Searcher:
     
     def output_query(self, queryMessage, length = 10):
         rankedScores = self.query(queryMessage, length)
-        
         for (score, urlId) in rankedScores:
             print '%f\t%s' % (score, self.get_url_name(urlId))
         
@@ -319,7 +320,7 @@ class Searcher:
         try:
             count = self.connection.execute("select count(*) from sqlite_master where type = 'table' and name = 'page_rank'").fetchone()[0]
             if count <= 0:
-                crawler = Crawler('searchindex.db')
+                crawler = Crawler(self.dbName)
                 crawler.calculate_page_rank(iterations = 5)
         except:
             print "Initiate page_rank failed!"
