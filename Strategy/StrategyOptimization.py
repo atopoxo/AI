@@ -5,7 +5,7 @@ Created on 2017/05/17
 '''
 
 import time
-from wx.tools.Editra.src.syntax import _latex
+import random
 
 def read_file(filePath):
     flights = {}
@@ -24,7 +24,42 @@ def print_schedule(flights, plans, solution):
             destination = plans[name][i][1]
             recorder = flights[(origin, destination)][solution[name][i]]
             print '%20s %5s %6s %5s-%5s $%3s' % (origin, '-->', destination, recorder[0], recorder[1], recorder[2])
+    
+def random_optimize(flights, plans, costFunction, times = 1000, bIsSmallBast = True):
+    best = -1
+    bestSolution = None
+    
+    randomValues = {}
+    for name in plans:
+        randomValues[name] = []
+        for i in range(len(plans[name])):
+            origin = plans[name][i][0]
+            destination = plans[name][i][1]
+            maxValue = len(flights[(origin, destination)])
+            randomValues[name].append((0, maxValue - 1))
+            
+    for i in range(times):
+        solution = {}
+        for name in plans:
+            solution[name] = []
+            for i in range(len(randomValues[name])):
+                solution[name].append(random.randint(randomValues[name][i][0], randomValues[name][i][1]))
         
+        cost = costFunction(flights, plans, solution)
+        if best == -1:
+            best = cost
+        
+        if bIsSmallBast:
+            if best > cost:
+                best = cost
+                bestSolution = solution
+        else:
+            if best < cost:
+                best = cost
+                bestSolution = solution
+    
+    return best, bestSolution
+ 
 def schedule_cost(flights, plans, solution):
     totalPrice = 0
     totalWaitTime = 0

@@ -18,6 +18,7 @@ from API import DownLoadZeboData
 from API import DrawImage
 import os
 from NNs import NNsSearchNet
+from Strategy.StrategyOptimization import schedule_cost
 
 def print_tuple_table(values):
     column = [""]
@@ -159,6 +160,12 @@ def Test():
         "Buddy" : [("ORD", "LGA"), ("LGA", "ORD")], 
         "Les" : [("OMA", "LGA"), ("LGA", "OMA")]
     }
+    
+    cost, solution = StrategyOptimization.random_optimize(flights, plans, StrategyOptimization.schedule_cost)
+    print cost
+    print solution
+    StrategyOptimization.print_schedule(flights, plans, solution)
+    
     solution = {
         "Seymour" : [1, 4], 
         "Franny" : [3, 2], 
@@ -167,8 +174,9 @@ def Test():
         "Buddy" : [2, 4], 
         "Les" : [5, 3]
     }
-    StrategyOptimization.print_schedule(flights, plans, solution)
     print StrategyOptimization.schedule_cost(flights, plans, solution)
+    print solution
+    StrategyOptimization.print_schedule(flights, plans, solution)
     print "Finished!"
 
 if __name__ == '__main__':
