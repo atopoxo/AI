@@ -9,6 +9,7 @@ encoding//NNs/NNsSearchNet.py=utf-8
 encoding//Skill/SkillSearchEngine.py=utf-8
 encoding//Strategy/StrategyCluster.py=utf-8
 encoding//Strategy/StrategyGenerateFeeds.py=utf-8
+encoding//Strategy/StrategyOptimization.py=utf-8
 encoding//Strategy/StrategyRecommendations.py=utf-8
 encoding//Strategy/StrategyScale.py=utf-8
 encoding//Strategy/StrategySimilarity.py=utf-8

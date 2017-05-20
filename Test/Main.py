@@ -10,6 +10,7 @@ from Strategy import StrategySimilarity
 from Strategy import StrategyGenerateFeeds
 from Strategy import StrategyCluster
 from Strategy import StrategyScale
+from Strategy import StrategyOptimization
 from Skill import SkillSearchEngine
 from API import sheet
 from API import pydelicious
@@ -123,7 +124,7 @@ def Test():
     crawler = SkillSearchEngine.Crawler('searchindex.db')
     crawler.calculate_page_rank()
     '''
-    
+    '''
     mynet = NNsSearchNet.SearchNet('NeuralNetworks.db')
     
     wWorld = 1
@@ -135,10 +136,11 @@ def Test():
     uEarth = 13
     outputIdList = [uWorldBank, uRiver, uEarth]
     '''
+    '''
     mynet.train_correlation([wWorld, wBank], outputIdList, uWorldBank)
     print mynet.get_correlation([wWorld, wBank], outputIdList)
     '''
-    
+    '''
     for i in range(30):
         mynet.train_correlation([wWorld, wBank], outputIdList, uWorldBank)
         mynet.train_correlation([wRiver, wBank], outputIdList, uRiver)
@@ -147,7 +149,26 @@ def Test():
     print mynet.get_correlation([wWorld, wBank], outputIdList)
     print mynet.get_correlation([wRiver, wBank], outputIdList)
     print mynet.get_correlation([wBank], outputIdList)
-    
+    '''
+    flights = StrategyOptimization.read_file('I:/SVN/Repository/AI/Data/schedule.txt')
+    plans = {
+        "Seymour" : [("BOS", "LGA"), ("LGA", "BOS")], 
+        "Franny" : [("DAL", "LGA"), ("LGA", "DAL")], 
+        "Zooey" : [("CAK", "LGA"), ("LGA", "CAK")], 
+        "Walt" : [("MIA", "LGA"), ("LGA", "MIA")], 
+        "Buddy" : [("ORD", "LGA"), ("LGA", "ORD")], 
+        "Les" : [("OMA", "LGA"), ("LGA", "OMA")]
+    }
+    solution = {
+        "Seymour" : [1, 4], 
+        "Franny" : [3, 2], 
+        "Zooey" : [7, 3], 
+        "Walt" : [6, 3], 
+        "Buddy" : [2, 4], 
+        "Les" : [5, 3]
+    }
+    StrategyOptimization.print_schedule(flights, plans, solution)
+    print StrategyOptimization.schedule_cost(flights, plans, solution)
     print "Finished!"
 
 if __name__ == '__main__':
