@@ -17,6 +17,7 @@ def random_optimize(boundaries, costFunction, times = 1000, bIsSmallBest = True)
         
         if best == -1:
             best = cost
+            bestSolution = solution
         
         if bIsSmallBest:
             if best > cost:

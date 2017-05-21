@@ -4,7 +4,6 @@ Created on 2017/04/25
 @author: crystal
 '''
 from StrategySimilarity import *
-from win32com.client.build import demunge_leading_underscores
 
 def top_matches(prefers, person, n = 5, similarity = get_pearson_correlation):
     scores = [(similarity(prefers, person, other), other) for other in prefers if other != person]

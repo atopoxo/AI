@@ -13,6 +13,7 @@ from Strategy import StrategyScale
 from Skill import SkillSearchEngine
 from Skill import SkillFlightOptimization
 from Skill import SkillDormOptimization
+from Skill import SkillSocialNetworksOptimization
 from API import sheet
 from API import pydelicious
 from API import DownLoadZeboData
@@ -125,6 +126,29 @@ def dorm_optimize_test():
     
     SkillDormOptimization.print_solution(prefers, dorms, solution)
 
+def social_network_test():
+    
+    people=['Charlie','Augustus','Veruca','Violet','Mike','Joe','Willy','Miranda']
+    
+    links=[('Augustus', 'Willy'), 
+           ('Mike', 'Joe'), 
+           ('Miranda', 'Mike'), 
+           ('Violet', 'Augustus'), 
+           ('Miranda', 'Willy'), 
+           ('Charlie', 'Mike'), 
+           ('Veruca', 'Joe'), 
+           ('Miranda', 'Augustus'), 
+           ('Willy', 'Augustus'), 
+           ('Joe', 'Charlie'), 
+           ('Veruca', 'Augustus'), 
+           ('Miranda', 'Joe')]
+    
+    socialNetworksOptimization = SkillSocialNetworksOptimization.SocialNetworksOptimization(people, links)
+    cost, solution = socialNetworksOptimization.social_networks_random_optimize()
+    print cost
+    print solution
+    DrawImage.draw_social_networks(solution, people, links)
+    
 def Test():
     '''print get_euclid_correlation(critics, 'Lisa Rose', 'Gene Seymour')
     print get_pearson_correlation(critics, 'Lisa Rose', 'Gene Seymour')
@@ -213,12 +237,13 @@ def Test():
     print mynet.get_correlation([wRiver, wBank], outputIdList)
     print mynet.get_correlation([wBank], outputIdList)
     '''
-    
+    '''
     flight_optimize_test()
-    
+    '''
     '''
     dorm_optimize_test()
     '''
+    social_network_test()
     print ""
     print "Finished!"
 

@@ -77,3 +77,17 @@ def draw_two_demension(data, labels, jpeg = 'drawTwoDemension.jpg'):
         y = (data[i][1] + 0.5) * 1000
         draw.text((x, y), labels[i], (0, 0, 0))
     picture.save(jpeg, 'JPEG')
+    
+def draw_social_networks(solution, people, links, jpeg = 'socialNetworks.jpg'):
+    picture = Image.new('RGB', (400, 400), (255, 255, 255))
+    draw = ImageDraw.Draw(picture)
+    
+    positions = dict([(people[i], (solution[i * 2], solution[i * 2 + 1])) for i in range(0, len(people))])
+    
+    for (a, b) in links:
+        draw.line((positions[a], positions[b]), fill = (255, 0, 0))
+        
+    for name, position in positions.items():
+        draw.text(position, name, (0, 0, 0))
+        
+    picture.save(jpeg, 'JPEG')
