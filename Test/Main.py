@@ -160,23 +160,30 @@ def Test():
         "Buddy" : [("ORD", "LGA"), ("LGA", "ORD")], 
         "Les" : [("OMA", "LGA"), ("LGA", "OMA")]
     }
-    
+    print "random_optimize"
     cost, solution = StrategyOptimization.random_optimize(flights, plans, StrategyOptimization.schedule_cost)
     print cost
     print solution
     StrategyOptimization.print_schedule(flights, plans, solution)
     
-    solution = {
-        "Seymour" : [1, 4], 
-        "Franny" : [3, 2], 
-        "Zooey" : [7, 3], 
-        "Walt" : [6, 3], 
-        "Buddy" : [2, 4], 
-        "Les" : [5, 3]
-    }
-    print StrategyOptimization.schedule_cost(flights, plans, solution)
+    print "hill_climb_optimize"
+    cost, solution = StrategyOptimization.hill_climb_optimize(flights, plans, StrategyOptimization.schedule_cost)
+    print cost
     print solution
     StrategyOptimization.print_schedule(flights, plans, solution)
+    
+    print "annealing_optimize"
+    cost, solution = StrategyOptimization.annealing_optimize(flights, plans, StrategyOptimization.schedule_cost, temperature = 10000.0, cool = 0.99, step = 2)
+    print cost
+    print solution
+    StrategyOptimization.print_schedule(flights, plans, solution)
+    
+    print "genetic_optimize"
+    cost, solution = StrategyOptimization.genetic_optimize(flights, plans, StrategyOptimization.schedule_cost, populationSize = 100, elite = 0.2, mutateProbability = 0.2, step = 1, times = 100)
+    print cost
+    print solution
+    StrategyOptimization.print_schedule(flights, plans, solution)
+    
     print "Finished!"
 
 if __name__ == '__main__':
