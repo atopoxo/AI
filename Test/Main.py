@@ -10,15 +10,16 @@ from Strategy import StrategySimilarity
 from Strategy import StrategyGenerateFeeds
 from Strategy import StrategyCluster
 from Strategy import StrategyScale
-from Strategy import StrategyOptimization
 from Skill import SkillSearchEngine
+from Skill import SkillFlightOptimization
+from Skill import SkillDormOptimization
 from API import sheet
 from API import pydelicious
 from API import DownLoadZeboData
 from API import DrawImage
+from API import kayak
 import os
 from NNs import NNsSearchNet
-from Strategy.StrategyOptimization import schedule_cost
 
 def print_tuple_table(values):
     column = [""]
@@ -63,6 +64,67 @@ def load_movie_lens(path = 'I:/SVN/Repository/AI/Data/ml-100k'):
         
     return prefers
     
+def flight_optimize_test():
+    plans = {
+        "Seymour" : [("BOS", "LGA"), ("LGA", "BOS")], 
+        "Franny" : [("DAL", "LGA"), ("LGA", "DAL")], 
+        "Zooey" : [("CAK", "LGA"), ("LGA", "CAK")], 
+        "Walt" : [("MIA", "LGA"), ("LGA", "MIA")], 
+        "Buddy" : [("ORD", "LGA"), ("LGA", "ORD")], 
+        "Les" : [("OMA", "LGA"), ("LGA", "OMA")]
+    }
+    
+    flightOptimization = SkillFlightOptimization.FlightOptimization(plans)
+    flightOptimization.read_flights_data('I:/SVN/Repository/AI/Data/schedule.txt')
+    
+    '''
+    departDate = '20170521'
+    kayak.create_schedule(plans, departDate)
+    '''
+    print "random_optimize"
+    cost, solution = flightOptimization.flight_random_optimize()
+    print cost
+    print solution
+    flightOptimization.print_schedule(solution)
+    
+    print "hill_climb_optimize"
+    cost, solution = flightOptimization.flight_hill_climb_optimize()
+    print cost
+    print solution
+    flightOptimization.print_schedule(solution)
+    
+    print "annealing_optimize"
+    cost, solution = flightOptimization.flight_annealing_optimize()
+    print cost
+    print solution
+    flightOptimization.print_schedule(solution)
+    
+    print "genetic_optimize"
+    cost, solution = flightOptimization.flight_genetic_optimize()
+    print cost
+    print solution
+    flightOptimization.print_schedule(solution)
+    
+def dorm_optimize_test():
+    dorms = ['Zeus','Athena','Hercules','Bacchus','Pluto']
+
+    prefers = [('Toby', ('Bacchus', 'Hercules')),
+       ('Steve', ('Zeus', 'Pluto')),
+       ('Karen', ('Athena', 'Zeus')),
+       ('Sarah', ('Zeus', 'Pluto')),
+       ('Dave', ('Athena', 'Bacchus')), 
+       ('Jeff', ('Hercules', 'Pluto')), 
+       ('Fred', ('Pluto', 'Athena')), 
+       ('Suzie', ('Bacchus', 'Hercules')), 
+       ('Laura', ('Bacchus', 'Hercules')), 
+       ('James', ('Hercules', 'Athena'))
+    ]
+    
+    boundires = [(0, (len(dorms) * 2) - i - 1) for i in range(0, len(dorms) * 2)]
+    solution = [0 for i in range(10)]
+    
+    SkillDormOptimization.print_solution(prefers, dorms, solution)
+
 def Test():
     '''print get_euclid_correlation(critics, 'Lisa Rose', 'Gene Seymour')
     print get_pearson_correlation(critics, 'Lisa Rose', 'Gene Seymour')
@@ -151,39 +213,13 @@ def Test():
     print mynet.get_correlation([wRiver, wBank], outputIdList)
     print mynet.get_correlation([wBank], outputIdList)
     '''
-    flights = StrategyOptimization.read_file('I:/SVN/Repository/AI/Data/schedule.txt')
-    plans = {
-        "Seymour" : [("BOS", "LGA"), ("LGA", "BOS")], 
-        "Franny" : [("DAL", "LGA"), ("LGA", "DAL")], 
-        "Zooey" : [("CAK", "LGA"), ("LGA", "CAK")], 
-        "Walt" : [("MIA", "LGA"), ("LGA", "MIA")], 
-        "Buddy" : [("ORD", "LGA"), ("LGA", "ORD")], 
-        "Les" : [("OMA", "LGA"), ("LGA", "OMA")]
-    }
-    print "random_optimize"
-    cost, solution = StrategyOptimization.random_optimize(flights, plans, StrategyOptimization.schedule_cost)
-    print cost
-    print solution
-    StrategyOptimization.print_schedule(flights, plans, solution)
     
-    print "hill_climb_optimize"
-    cost, solution = StrategyOptimization.hill_climb_optimize(flights, plans, StrategyOptimization.schedule_cost)
-    print cost
-    print solution
-    StrategyOptimization.print_schedule(flights, plans, solution)
+    flight_optimize_test()
     
-    print "annealing_optimize"
-    cost, solution = StrategyOptimization.annealing_optimize(flights, plans, StrategyOptimization.schedule_cost, temperature = 10000.0, cool = 0.99, step = 2)
-    print cost
-    print solution
-    StrategyOptimization.print_schedule(flights, plans, solution)
-    
-    print "genetic_optimize"
-    cost, solution = StrategyOptimization.genetic_optimize(flights, plans, StrategyOptimization.schedule_cost, populationSize = 100, elite = 0.2, mutateProbability = 0.2, step = 1, times = 100)
-    print cost
-    print solution
-    StrategyOptimization.print_schedule(flights, plans, solution)
-    
+    '''
+    dorm_optimize_test()
+    '''
+    print ""
     print "Finished!"
 
 if __name__ == '__main__':
