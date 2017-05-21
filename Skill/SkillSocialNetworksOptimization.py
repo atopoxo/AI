@@ -29,6 +29,10 @@ class SocialNetworksOptimization:
                 (x1, y1), (x2, y2) = positions[self.links[i][0]], positions[self.links[i][1]]
                 (x3, y3), (x4, y4) = positions[self.links[j][0]], positions[self.links[j][1]]
                 
+                distance = math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
+                if distance < 50:
+                    totalCount += (1.0 - (distance / 50.0))
+                
                 denominator = (x2 - x1) * (y4 - y3) - (x4 - x3) * (y2 - y1)
                 if denominator == 0:
                     continue
