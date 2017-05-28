@@ -14,6 +14,7 @@ from Skill import SkillSearchEngine
 from Skill import SkillFlightOptimization
 from Skill import SkillDormOptimization
 from Skill import SkillSocialNetworksOptimization
+from Skill import SkillDocFilter
 from API import sheet
 from API import pydelicious
 from API import DownLoadZeboData
@@ -149,6 +150,24 @@ def social_network_test():
     print solution
     DrawImage.draw_social_networks(solution, people, links)
     
+def doc_filter_test():
+    def sample_train(docFilter):
+        docFilter.train('Nobody owns the water.', 'good')
+        docFilter.train('the quick rabbit jumps fences', 'good')
+        docFilter.train('buy pharmaceuticals now', 'bad')
+        docFilter.train('make quick money at the online casino', 'bad')
+        docFilter.train('the quick brown fox jumps', 'good')
+        
+    docFilter = SkillDocFilter.DocFilter()
+    sample_train(docFilter)
+    print docFilter.classify('quick rabbit', default = 'unknown')
+    print docFilter.classify('quick money', default = 'unknown')
+    docFilter.set_threshold('bad', 3.0)
+    print docFilter.classify('quick money', default = 'unknown')
+    for i in range(10):
+        sample_train(docFilter)
+    print docFilter.classify('quick money', default = 'unknown')
+    
 def Test():
     '''print get_euclid_correlation(critics, 'Lisa Rose', 'Gene Seymour')
     print get_pearson_correlation(critics, 'Lisa Rose', 'Gene Seymour')
@@ -243,7 +262,10 @@ def Test():
     '''
     dorm_optimize_test()
     '''
+    '''
     social_network_test()
+    '''
+    doc_filter_test()
     print ""
     print "Finished!"
 
