@@ -158,15 +158,12 @@ def doc_filter_test():
         docFilter.train('make quick money at the online casino', 'bad')
         docFilter.train('the quick brown fox jumps', 'good')
         
-    docFilter = SkillDocFilter.DocFilter()
-    sample_train(docFilter)
-    print docFilter.classify('quick rabbit', default = 'unknown')
-    print docFilter.classify('quick money', default = 'unknown')
-    docFilter.set_threshold('bad', 3.0)
-    print docFilter.classify('quick money', default = 'unknown')
-    for i in range(10):
-        sample_train(docFilter)
-    print docFilter.classify('quick money', default = 'unknown')
+    docFilter1 = SkillDocFilter.DocFilter()
+    docFilter1.set_db('DocFilter.db')
+    sample_train(docFilter1)
+    docFilter2 = SkillDocFilter.DocFilter()
+    docFilter2.set_db('DocFilter.db')
+    print docFilter2.classify('quick money')
     
 def Test():
     '''print get_euclid_correlation(critics, 'Lisa Rose', 'Gene Seymour')

@@ -6,102 +6,102 @@ Created on 2017/05/22
 
 import re
 import math
+from sqlite3 import dbapi2 as sqlite
+from Strategy import StrategyProbability
 from unicodedata import category
 
 class DocFilter:
     def __init__(self):
         self.features = {}
         self.categories = {}
-        self.thresholds = {}
         self.get_features = self.get_words
+        self.naiveBayes = StrategyProbability.NaiveBayes(self.get_features, self.get_categories, self.weighted_probability, self.get_category_probability)
+        self.fisher = StrategyProbability.Fisher(self.get_features, self.get_categories, self.get_feature_probability, self.get_feature_total_count)
+    
+    def set_db(self, dbFile):
+        self.connection = sqlite.connect(dbFile)
+        self.connection.execute('create table if not exists feature_count(feature, category, count)')
+        self.connection.execute('create table if not exists category_count(category, count)')
     
     def train(self, doc, category):
         features = self.get_features(doc)
         for feature in features:
             self.increase_feature(feature, category)
         self.increate_category(category)
-    
-    def classify(self, doc, default = None):
-        probalities = {}
-        max = 0.0
-        bestCategory = None
+        self.connection.commit()
         
-        for category in self.categories:
-            probalities[category] = self.get_category_in_doc_probability(doc, category)
-            if probalities[category] > max:
-                max = probalities[category]
-                bestCategory = category
-        
-        for category in self.categories:
-            if category == bestCategory:
-                continue
-            if probalities[category] * self.get_threshold(bestCategory) > probalities[bestCategory]:
-                return default
-        return bestCategory
-        
-    #Pr(A|B) = Pr(B|A) x Pr(A) / Pr(B) --use set to clarify
-    def get_category_in_doc_probability(self, doc, category):
-        docInCategoryProbability = self.get_doc_in_category_probability(doc, category)
-        categoryProbability = float(self.get_category(category)) / self.get_categories()
-        docProbability = 1
-        return docInCategoryProbability * categoryProbability / docProbability
-        
-    def get_doc_in_category_probability(self, doc, category):
-        features = self.get_features(doc)
-        probability = 1
-        for feature in features:
-            probability *= self.weighted_probability(feature, category, self.get_probability)
-        return probability
-    
-    def weighted_probability(self, feature, category, probabilityFunction, weight = 1.0, assumedProbability = 0.5):
-        basicProbability = probabilityFunction(feature, category)
-        featureTotalCount = sum([self.get_feature(feature, category) for category in self.categories.keys()])
-        probability = float(((weight * assumedProbability) + (featureTotalCount * basicProbability))) / (weight + featureTotalCount)
-        return probability
-        
-    def get_probability(self, feature, category):
-        if self.get_category(category) == 0:
-            return 0.0
+    def classify(self, item, id = 0, default = None):
+        if id == 0:
+            return self.naiveBayes.classify(item, default)
         else:
-            return float(self.get_feature(feature, category)) / self.get_category(category)
+            return self.fisher.classify(item, default)
+    
+    def weighted_probability(self, feature, category, weight = 1.0, assumedProbability = 0.5):
+        basicProbability = self.get_feature_probability(feature, category)
+        featureTotalCount = sum([self.get_feature_count(feature, currentCategory) for currentCategory in self.get_categories()])
+        return float(((weight * assumedProbability) + (featureTotalCount * basicProbability))) / (weight + featureTotalCount)
         
     def get_words(self, doc):
         splitter = re.compile('\\W*')
         #splite the words from doc which i not a letter
         words = [word.lower() for word in splitter.split(doc) if len(word) > 2 and len(word) < 20]
         return dict([(word, 1) for word in words])
-    
-    def get_threshold(self, category):
-        if category not in self.thresholds:
-            return 1.0
+
+    def get_feature_total_count(self, feature):
+        res = self.connection.execute('select sum(count) from feature_count where feature = "%s"' % (feature)).fetchone()
+        if res == None:
+            return 0
         else:
-            return self.thresholds[category]
+            return float(res[0])
     
-    def set_threshold(self, category, value):
-        self.thresholds[category] = float(value)
-    
+    def get_feature_probability(self, feature, category):
+        if self.get_category_count(category) == 0:
+            return 0.0
+        else:
+            return float(self.get_feature_count(feature, category)) / self.get_category_count(category)
+           
     def increase_feature(self, feature, category):
-        self.features.setdefault(feature, {})
-        self.features[feature].setdefault(category, 0)
-        self.features[feature][category] += 1
+        count = self.get_feature_count(feature, category)
+        if count == 0:
+            self.connection.execute("insert into feature_count values('%s', '%s', 1)" % (feature, category))
+        else:
+            self.connection.execute("update feature_count set count = %d where feature = '%s' and category = '%s'" % (count + 1, feature, category))
         
-    def increate_category(self, category):
-        self.categories.setdefault(category, 0)
-        self.categories[category] += 1
+    def get_feature_count(self, feature, category):
+        res = self.connection.execute('select count from feature_count where feature = "%s" and category = "%s"' % (feature, category)).fetchone()
+        if res == None:
+            return 0
+        else:
+            return float(res[0])
     
-    def get_feature(self, feature, category):
-        if feature in self.features and category in self.features[feature]:
-            return self.features[feature][category]
-        else:
+    def get_category_total_count(self):
+        res = self.connection.execute('select sum(count) from category_count').fetchone()
+        if res == None:
             return 0
-        
-    def get_category(self, category):
-        if category in self.categories:
-            return self.categories[category]
         else:
-            return 0
+            return res[0]
         
     def get_categories(self):
-        return sum(self.categories.values())
+        res = self.connection.execute('select category from category_count')
+        return [currentRes[0] for currentRes in res]
     
+    def get_category_probability(self, category):
+        categoryValue = self.get_category_count(category)
+        if categoryValue == 0:
+            return 0.0
+        else:
+            return float(categoryValue) / self.get_category_total_count()
     
+    def increate_category(self, category):
+        count = self.get_category_count(category)
+        if count == 0:
+            self.connection.execute("insert into category_count values('%s', 1)" % (category))
+        else:
+            self.connection.execute("update category_count set count = %d where category = '%s'" % (count + 1, category))
+            
+    def get_category_count(self, category):
+        res = self.connection.execute('select count from category_count where category = "%s"' % (category)).fetchone()
+        if res == None:
+            return 0;
+        else:
+            return float(res[0])
