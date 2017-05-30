@@ -15,6 +15,7 @@ from Skill import SkillFlightOptimization
 from Skill import SkillDormOptimization
 from Skill import SkillSocialNetworksOptimization
 from Skill import SkillDocFilter
+from Skill import SkillFeedFilter
 from API import sheet
 from API import pydelicious
 from API import DownLoadZeboData
@@ -158,12 +159,11 @@ def doc_filter_test():
         docFilter.train('make quick money at the online casino', 'bad')
         docFilter.train('the quick brown fox jumps', 'good')
         
-    docFilter1 = SkillDocFilter.DocFilter()
-    docFilter1.set_db('DocFilter.db')
-    sample_train(docFilter1)
-    docFilter2 = SkillDocFilter.DocFilter()
-    docFilter2.set_db('DocFilter.db')
-    print docFilter2.classify('quick money')
+    feedFilter = SkillFeedFilter.FeedFilter()
+    feedFilter.set_features(feedFilter.entry_features)
+    feedFilter.set_db("FeedFilter.db")
+    feedFilter.read("..\\Data\\python_search.xml")
+    print feedFilter.naiveBayes.get_posterior_probability('python', 'prog')
     
 def Test():
     '''print get_euclid_correlation(critics, 'Lisa Rose', 'Gene Seymour')

@@ -22,6 +22,9 @@ class DocFilter:
         self.connection = sqlite.connect(dbFile)
         self.connection.execute('create table if not exists feature_count(feature, category, count)')
         self.connection.execute('create table if not exists category_count(category, count)')
+        
+    def set_features(self, function):
+        self.get_features = function
     
     def train(self, doc, category):
         features = self.get_features(doc)

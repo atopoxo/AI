@@ -3,7 +3,7 @@
 Created on 2017/04/30
 @author: crystal
 '''
-from API import feedparser
+import feedparser
 import re
 
 def get_words_count(url):
