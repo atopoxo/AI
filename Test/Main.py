@@ -23,6 +23,7 @@ from API import DrawImage
 from API import kayak
 import os
 from NNs import NNsSearchNet
+from DecisionTree import DecisionTreePredict
 
 def print_tuple_table(values):
     column = [""]
@@ -165,6 +166,27 @@ def doc_filter_test():
     feedFilter.read("..\\Data\\python_search.xml")
     print feedFilter.naiveBayes.get_posterior_probability('python', 'prog')
     
+def tree_predict():
+    myData =[['slashdot','USA','yes',18,'None'],
+        ['google','France','yes',23,'Premium'],
+        ['digg','USA','yes',24,'Basic'],
+        ['kiwitobes','France','yes',23,'Basic'],
+        ['google','UK','no',21,'Premium'],
+        ['(direct)','New Zealand','no',12,'None'],
+        ['(direct)','UK','no',21,'Basic'],
+        ['google','USA','no',24,'Premium'],
+        ['slashdot','France','yes',19,'None'],
+        ['digg','USA','no',18,'None'],
+        ['google','UK','no',18,'None'],
+        ['kiwitobes','UK','no',19,'None'],
+        ['digg','New Zealand','yes',12,'Basic'],
+        ['slashdot','UK','no',21,'None'],
+        ['google','UK','yes',18,'Basic'],
+        ['kiwitobes','France','yes',19,'Basic']]
+
+    node = DecisionTreePredict.DecisionTreePredictNode()
+    node.build_tree(myData)
+    
 def Test():
     '''print get_euclid_correlation(critics, 'Lisa Rose', 'Gene Seymour')
     print get_pearson_correlation(critics, 'Lisa Rose', 'Gene Seymour')
@@ -253,17 +275,7 @@ def Test():
     print mynet.get_correlation([wRiver, wBank], outputIdList)
     print mynet.get_correlation([wBank], outputIdList)
     '''
-    '''
-    flight_optimize_test()
-    '''
-    '''
-    dorm_optimize_test()
-    '''
-    '''
-    social_network_test()
-    '''
-    doc_filter_test()
-    print ""
+    tree_predict()
     print "Finished!"
 
 if __name__ == '__main__':
