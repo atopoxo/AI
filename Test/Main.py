@@ -185,7 +185,15 @@ def tree_predict():
         ['kiwitobes','France','yes',19,'Basic']]
 
     node = DecisionTreePredict.DecisionTreePredictNode()
-    node.build_tree(myData)
+    node = node.get_tree(myData)
+    '''
+    node.prune(node, 0.1)
+    node.prune(node, 1)
+    '''
+    DrawImage.print_tree(node)
+    '''DrawImage.draw_decision_tree(node, 'I:/SVN/Repository/AI/Test/decision.jpg')'''
+    print node.modified_classify(['google', None, 'yes', None], node)
+    print node.modified_classify(['google', 'France', None, None], node)
     
 def Test():
     '''print get_euclid_correlation(critics, 'Lisa Rose', 'Gene Seymour')

@@ -91,3 +91,65 @@ def draw_social_networks(solution, people, links, jpeg = 'socialNetworks.jpg'):
         draw.text(position, name, (0, 0, 0))
         
     picture.save(jpeg, 'JPEG')
+    
+def print_tree(tree, indent = ''):
+    if tree.results != None:
+        print str(tree.results)
+    else:
+        print str(tree.criteriaIndex) + ':' + str(tree.judgeValue) + '? '
+        index = 0
+        for node in tree.nodes:
+            print indent + str(index) + '->',
+            print_tree(tree.nodes[index], indent + '  ')
+            index += 1
+            
+def get_decision_tree_node_width(tree):
+    width = 0
+    
+    if tree.nodes == None:
+        return 1
+    else:
+        for node in tree.nodes:
+            if node != None:
+                width += get_decision_tree_node_width(node)
+        return width
+    
+def get_decision_tree_node_depth(tree):
+    height = 0
+    
+    if tree.nodes == None:
+        return 0
+    else:
+        for node in tree.nodes:
+            if node != None:
+                height += get_decision_tree_node_width(node)
+        return height + 1
+    
+def draw_decision_tree(tree, jpeg = 'tree.jpg'):
+    width = get_decision_tree_node_width(tree) * 100
+    height = get_decision_tree_node_depth(tree) * 100 + 120
+    
+    picture = Image.new('RGB', (width, height), (255, 255, 255))
+    draw = ImageDraw.Draw(picture)
+    
+    draw_decision_tree_node(draw, tree, width / 2, 20)
+    picture.save(jpeg, 'JPEG')
+    
+def draw_decision_tree_node(draw, tree, x, y):
+    if tree.results == None:
+        draw.text((x - 20, y - 10), str(tree.criteriaIndex) + ':' + str(tree.judgeValue), (0, 0, 0))
+        totalWidth = 0
+        for node in tree.nodes:
+            totalWidth += get_decision_tree_node_width(node) * 100
+            
+        left = x - totalWidth / 2
+        
+        for node in tree.nodes:
+            width = get_decision_tree_node_width(node) * 100
+            draw.line((x, y, left + width / 2, y + 100), fill = (255, 0, 0))
+            draw_decision_tree_node(draw, node, left + width / 2, y + 100)
+            left += width
+            
+    else:
+        txt = ' \n'.join(['%s:%d' % value for value in tree.results.items()])
+        draw.text((x - 20, y), txt, (0, 0, 0))

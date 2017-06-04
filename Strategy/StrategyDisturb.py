@@ -32,3 +32,13 @@ def get_entropy(rows, getCountsFunction):
         value -= probability * log2(probability)
         
     return value
+
+def get_variance(rows, getCountsFunction):
+    if len(rows) == 0:
+        return 0
+    
+    counts  = getCountsFunction(rows)
+    total   = len(counts)
+    mean    = sum(counts) / total
+    result  = sum([(count - mean)**2 for count in counts]) / total
+    return result
